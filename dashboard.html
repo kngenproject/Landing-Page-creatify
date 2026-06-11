@@ -363,137 +363,162 @@
     appId:             "1:142614580975:web:368ba820dbfc5f69ca151a"
   };
 
-  try {
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    // ======================= UI ELEMENTS =======================
-    const userDisplayName = document.getElementById('userDisplayName');
-    const userName = document.getElementById('userName');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const createNewBtn = document.getElementById('createNewBtn');
-    const createNewEmptyBtn = document.getElementById('createNewEmptyBtn');
-    const invitationsContainer = document.getElementById('invitationsContainer');
-    const emptyState = document.getElementById('emptyState');
-    const loadingState = document.getElementById('loadingState');
+  // UI Elements
+  const userDisplayName = document.getElementById('userDisplayName');
+  const userName = document.getElementById('userName');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const createNewBtn = document.getElementById('createNewBtn');
+  const createNewEmptyBtn = document.getElementById('createNewEmptyBtn');
+  const invitationsContainer = document.getElementById('invitationsContainer');
+  const emptyState = document.getElementById('emptyState');
+  const loadingState = document.getElementById('loadingState');
 
-    // ======================= AUTH CHECK =======================
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        // Redirect ke login jika tidak ada user
-        window.location.href = './index.html';
-        return;
-      }
+  let currentUser = null;
 
-      // Set user info
-      const displayName = user.displayName || user.email || 'Pengguna';
-      userDisplayName.textContent = displayName.split(' ')[0]; // Nama pertama saja
-      userName.textContent = displayName.split(' ')[0];
-
-      // Load invitations
-      loadInvitations(user);
+  // Format tanggal
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('id-ID', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
     });
-
-    // ======================= LOAD INVITATIONS =======================
-    function loadInvitations(user) {
-      loadingState.style.display = 'flex';
-      
-      // Simulasi loading delay
-      setTimeout(() => {
-        const savedInvitations = localStorage.getItem('creatifyInvitations');
-        const invitations = savedInvitations ? JSON.parse(savedInvitations) : [];
-
-        loadingState.style.display = 'none';
-
-        if (invitations.length === 0) {
-          emptyState.style.display = 'block';
-          invitationsContainer.innerHTML = '';
-        } else {
-          emptyState.style.display = 'none';
-          renderInvitations(invitations);
-        }
-      }, 500);
-    }
-
-    function renderInvitations(invitations) {
-      invitationsContainer.innerHTML = `
-        <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 20px; color: var(--text);">
-          Undangan Anda (${invitations.length})
-        </h2>
-        <div class="grid">
-          ${invitations.map((inv, idx) => `
-            <div class="card">
-              <div class="card-icon">💌</div>
-              <h3>${inv.eventName}</h3>
-              <div class="card-desc">${inv.eventLocation}</div>
-              <div class="card-meta">
-                📅 ${formatDate(inv.eventDate)}
-              </div>
-              <div class="card-action">
-                <button class="btn-small" onclick="editInvitation(${idx})">✏️ Edit</button>
-                <button class="btn-small" onclick="shareInvitation(${idx})">🔗 Bagikan</button>
-                <button class="btn-small delete" onclick="deleteInvitation(${idx})">🗑️ Hapus</button>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    function formatDate(dateStr) {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('id-ID', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-    }
-
-    // Global functions
-    window.editInvitation = function(idx) {
-      alert(`Edit undangan #${idx + 1} - Fitur ini akan segera tersedia`);
-    };
-
-    window.shareInvitation = function(idx) {
-      alert(`Share undangan #${idx + 1} - Link akan disalin ke clipboard`);
-    };
-
-    window.deleteInvitation = function(idx) {
-      if (confirm('Apakah Anda yakin ingin menghapus undangan ini?')) {
-        const savedInvitations = localStorage.getItem('creatifyInvitations');
-        const invitations = savedInvitations ? JSON.parse(savedInvitations) : [];
-        invitations.splice(idx, 1);
-        localStorage.setItem('creatifyInvitations', JSON.stringify(invitations));
-        location.reload();
-      }
-    };
-
-    // ======================= EVENT LISTENERS =======================
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        await signOut(auth);
-        window.location.href = './index.html';
-      } catch (error) {
-        console.error('Logout error:', error);
-        alert('Gagal logout. Silakan coba lagi.');
-      }
-    });
-
-    createNewBtn.addEventListener('click', () => {
-      window.location.href = './generator.html';
-    });
-
-    createNewEmptyBtn.addEventListener('click', () => {
-      window.location.href = './generator.html';
-    });
-
-    console.log('✨ Creatify — Dashboard ready');
-
-  } catch (error) {
-    console.error('Firebase initialization error:', error);
-    alert('Gagal menginisialisasi aplikasi. Silakan refresh halaman.');
   }
-</script>
 
+  // Render invitations
+  function renderInvitations(invitations) {
+    if (!invitations || invitations.length === 0) {
+      emptyState.style.display = 'block';
+      invitationsContainer.innerHTML = '';
+      return;
+    }
+
+    emptyState.style.display = 'none';
+    invitationsContainer.innerHTML = `
+      <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 20px; color: var(--text);">
+        Undangan Anda (${invitations.length})
+      </h2>
+      <div class="grid">
+        ${invitations.map((inv, idx) => `
+          <div class="card">
+            <div class="card-icon">💌</div>
+            <h3>${escapeHtml(inv.eventName)}</h3>
+            <div class="card-desc">${escapeHtml(inv.eventLocation)}</div>
+            <div class="card-meta">
+              📅 ${formatDate(inv.eventDate)}
+            </div>
+            <div class="card-action">
+              <button class="btn-small" data-action="edit" data-idx="${idx}">✏️ Edit</button>
+              <button class="btn-small" data-action="share" data-idx="${idx}">🔗 Bagikan</button>
+              <button class="btn-small delete" data-action="delete" data-idx="${idx}">🗑️ Hapus</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // Attach event listeners to buttons
+    document.querySelectorAll('[data-action="edit"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = parseInt(btn.dataset.idx);
+        alert(`Edit undangan #${idx+1} - Fitur ini akan segera tersedia`);
+      });
+    });
+    document.querySelectorAll('[data-action="share"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = parseInt(btn.dataset.idx);
+        alert(`Share undangan #${idx+1} - Link akan disalin ke clipboard`);
+      });
+    });
+    document.querySelectorAll('[data-action="delete"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = parseInt(btn.dataset.idx);
+        if (confirm('Apakah Anda yakin ingin menghapus undangan ini?')) {
+          deleteInvitation(idx);
+        }
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function deleteInvitation(idx) {
+    if (!currentUser) return;
+    const key = `creatifyInvitations_${currentUser.uid}`;
+    const saved = localStorage.getItem(key);
+    let invitations = saved ? JSON.parse(saved) : [];
+    invitations.splice(idx, 1);
+    localStorage.setItem(key, JSON.stringify(invitations));
+    loadInvitations(currentUser);
+  }
+
+  function loadInvitations(user) {
+    loadingState.style.display = 'flex';
+    
+    setTimeout(() => {
+      const key = `creatifyInvitations_${user.uid}`;
+      const saved = localStorage.getItem(key);
+      let invitations = saved ? JSON.parse(saved) : [];
+      
+      // Cek apakah ada undangan guest yang belum dipindahkan
+      const guestKey = 'creatify_guest_invitation';
+      const guestInv = localStorage.getItem(guestKey);
+      if (guestInv) {
+        const guestData = JSON.parse(guestInv);
+        invitations.push(guestData);
+        localStorage.setItem(key, JSON.stringify(invitations));
+        localStorage.removeItem(guestKey);
+      }
+      
+      loadingState.style.display = 'none';
+      renderInvitations(invitations);
+    }, 500);
+  }
+
+  // Auth state
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = './index.html';
+      return;
+    }
+    currentUser = user;
+    const displayName = user.displayName || user.email || 'Pengguna';
+    userDisplayName.textContent = displayName.split(' ')[0];
+    userName.textContent = displayName.split(' ')[0];
+    loadInvitations(user);
+  });
+
+  // Logout
+  logoutBtn.addEventListener('click', async () => {
+    try {
+      await signOut(auth);
+      window.location.href = './index.html';
+    } catch (error) {
+      console.error('Logout error:', error);
+      alert('Gagal logout. Silakan coba lagi.');
+    }
+  });
+
+  // Create new invitation
+  createNewBtn.addEventListener('click', () => {
+    window.location.href = './generator.html';
+  });
+  createNewEmptyBtn.addEventListener('click', () => {
+    window.location.href = './generator.html';
+  });
+
+  console.log('✨ Creatify — Dashboard ready (with per-user storage)');
+</script>
 </body>
 </html>

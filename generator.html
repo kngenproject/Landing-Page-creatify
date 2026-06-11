@@ -291,6 +291,17 @@
       display: block;
     }
 
+    .warning-banner {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 10px 16px;
+      border-radius: 20px;
+      text-align: center;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
     @keyframes fadeUp {
       from {
         opacity: 0;
@@ -357,13 +368,17 @@
 <div class="container">
   <div class="hero">
     <h1>Buat Undangan Digital</h1>
-    <div class="hero-sub">Ciptakan undangan yang elegan dan profesional dalam hitungan menit. Tidak perlu desainer atau coding!</div>
+    <div class="hero-sub">Ciptakan undangan yang elegan dan profesional dalam hitungan menit.</div>
   </div>
 
   <div class="form-section">
     <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 24px; color: var(--text);">Informasi Acara Anda</h2>
     
-    <div class="message" id="successMessage">✓ Undangan berhasil dibuat! Silakan login untuk mengelolanya lebih lanjut.</div>
+    <div id="loginWarning" class="warning-banner" style="display: none;">
+      ⚠️ Anda belum login. Undangan akan tersimpan sementara. <a href="./index.html" style="color: var(--blue);">Login sekarang</a> agar undangan tersimpan ke akun Anda.
+    </div>
+
+    <div class="message" id="successMessage">✓ Undangan berhasil dibuat! Mengalihkan ke dashboard...</div>
 
     <form id="invitationForm">
       <div class="form-group">
@@ -430,21 +445,40 @@
 
     <div class="button-group">
       <button type="button" class="btn btn-secondary" id="editBtn">← Edit Kembali</button>
-      <button type="button" class="btn btn-primary" id="continueBtn">Lanjutkan ke Login →</button>
+      <button type="button" class="btn btn-primary" id="continueBtn">Lanjutkan ke Dashboard →</button>
     </div>
   </div>
 </div>
 
-<script>
-  // ======================= UI ELEMENTS =======================
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDSiWxxT-qgM_tStgaw7D8AuNaDgI3mkcY",
+    authDomain:        "creatify.my.id",
+    projectId:         "landing-page-creatify",
+    storageBucket:     "landing-page-creatify.firebasestorage.app",
+    messagingSenderId: "142614580975",
+    appId:             "1:142614580975:web:368ba820dbfc5f69ca151a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Elemen UI
   const form = document.getElementById('invitationForm');
   const previewSection = document.getElementById('previewSection');
   const successMessage = document.getElementById('successMessage');
   const loginNavBtn = document.getElementById('loginNavBtn');
   const editBtn = document.getElementById('editBtn');
   const continueBtn = document.getElementById('continueBtn');
+  const loginWarning = document.getElementById('loginWarning');
 
-  // Form inputs
+  // Inputs
   const eventNameInput = document.getElementById('eventName');
   const eventDateInput = document.getElementById('eventDate');
   const eventTimeInput = document.getElementById('eventTime');
@@ -453,44 +487,42 @@
   const colorThemeInput = document.getElementById('colorTheme');
   const specialMessageInput = document.getElementById('specialMessage');
 
-  // Preview elements
+  // Preview
   const previewEventName = document.getElementById('previewEventName');
   const previewDate = document.getElementById('previewDate');
   const previewLocation = document.getElementById('previewLocation');
   const previewMessage = document.getElementById('previewMessage');
 
-  // ======================= EVENT LISTENERS =======================
+  // State
+  let currentUser = null;
+  let savedInvitationId = null;
+
+  // Cek status login
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    if (user) {
+      loginWarning.style.display = 'none';
+    } else {
+      loginWarning.style.display = 'block';
+    }
+  });
+
+  // Set min date
+  const today = new Date().toISOString().split('T')[0];
+  eventDateInput.setAttribute('min', today);
+
+  // Submit form
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     
-    // Validasi input
     if (!eventNameInput.value.trim() || !eventDateInput.value || !eventTimeInput.value || !eventLocationInput.value.trim()) {
       alert('Harap lengkapi semua field yang diperlukan');
       return;
     }
 
-    // Update preview
-    previewEventName.textContent = eventNameInput.value;
-    
-    const dateObj = new Date(eventDateInput.value);
-    const dateStr = dateObj.toLocaleDateString('id-ID', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-    previewDate.innerHTML = `📅 ${dateStr}, Pukul ${eventTimeInput.value}`;
-    
-    previewLocation.textContent = `📍 ${eventLocationInput.value}`;
-    
-    if (specialMessageInput.value.trim()) {
-      previewMessage.textContent = specialMessageInput.value;
-    } else {
-      previewMessage.textContent = 'Kami mengundang Anda untuk merayakan momen istimewa bersama kami.';
-    }
-
-    // Simpan ke localStorage
-    const invitationData = {
+    // Buat objek undangan
+    const invitation = {
+      id: Date.now(),
       eventName: eventNameInput.value,
       eventDate: eventDateInput.value,
       eventTime: eventTimeInput.value,
@@ -500,39 +532,68 @@
       specialMessage: specialMessageInput.value,
       createdAt: new Date().toISOString()
     };
-    localStorage.setItem('creatifyInvitation', JSON.stringify(invitationData));
+
+    // Simpan ke localStorage berdasarkan user login atau guest
+    if (currentUser) {
+      const key = `creatifyInvitations_${currentUser.uid}`;
+      const existing = localStorage.getItem(key);
+      const invitations = existing ? JSON.parse(existing) : [];
+      invitations.push(invitation);
+      localStorage.setItem(key, JSON.stringify(invitations));
+    } else {
+      // Guest: simpan sementara
+      const guestKey = 'creatify_guest_invitation';
+      localStorage.setItem(guestKey, JSON.stringify(invitation));
+    }
+
+    savedInvitationId = invitation.id;
+
+    // Update preview
+    previewEventName.textContent = invitation.eventName;
+    const dateObj = new Date(invitation.eventDate);
+    const dateStr = dateObj.toLocaleDateString('id-ID', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    previewDate.innerHTML = `📅 ${dateStr}, Pukul ${invitation.eventTime}`;
+    previewLocation.textContent = `📍 ${invitation.eventLocation}`;
+    previewMessage.textContent = invitation.specialMessage || 'Kami mengundang Anda untuk merayakan momen istimewa bersama kami.';
 
     // Tampilkan preview
     form.style.display = 'none';
     previewSection.style.display = 'block';
     successMessage.classList.add('show');
     
-    // Scroll to preview
+    setTimeout(() => {
+      successMessage.classList.remove('show');
+    }, 2000);
+    
     previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
+  // Edit kembali
   editBtn.addEventListener('click', () => {
     form.style.display = 'block';
     previewSection.style.display = 'none';
-    successMessage.classList.remove('show');
     eventNameInput.focus();
   });
 
+  // Lanjut ke dashboard (jika login) atau ke login (jika belum)
   continueBtn.addEventListener('click', () => {
-    // Arahkan ke login dengan data undangan tersimpan
-    window.location.href = './index.html';
+    if (currentUser) {
+      window.location.href = './dashboard.html';
+    } else {
+      window.location.href = './index.html';
+    }
   });
 
   loginNavBtn.addEventListener('click', () => {
     window.location.href = './index.html';
   });
 
-  // Set minimum date to today
-  const today = new Date().toISOString().split('T')[0];
-  eventDateInput.setAttribute('min', today);
-
-  console.log('✨ Creatify — Invitation Generator ready');
+  console.log('✨ Creatify — Generator ready (with login detection)');
 </script>
-
 </body>
 </html>
