@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Daftar akun Creatify - Platform undangan digital">
+  <meta name="theme-color" content="#b89a6a">
+  <title>Creatify • Daftar Akun</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f5f0e8;
+      --blue: #b89a6a;
+      --sky: #d4b896;
+      --deep: #6b4f2e;
+      --text: #2c2118;
+      --muted: #9a8570;
+      --white: #fdfaf5;
+      --error-text: #c95a5a;
+      --success-text: #15803d;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(70px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 300px;
+      height: 300px;
+      top: -60px;
+      right: -40px;
+      background: radial-gradient(circle, #d4b89666, transparent 70%);
+    }
+    body::after {
+      width: 250px;
+      height: 250px;
+      bottom: -50px;
+      left: -30px;
+      background: radial-gradient(circle, #c9a87866, transparent 70%);
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      transition: 0.2s;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'Nunito', sans-serif;
+    }
+    .back-link:hover {
+      color: var(--deep);
+      text-decoration: underline;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 36px;
+      padding: 32px 28px;
+      box-shadow: 0 20px 40px rgba(80, 60, 35, 0.1), 0 4px 12px rgba(0,0,0,0.02);
+      border: 1px solid #e4d5c2;
+      animation: fadeUp 0.6s ease;
+    }
+
+    .card h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .card-sub {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .message {
+      border-radius: 20px;
+      padding: 12px 15px;
+      font-size: 13px;
+      margin-bottom: 18px;
+      text-align: center;
+      display: none;
+      animation: slideDown 0.3s ease;
+    }
+    .message.show {
+      display: block;
+    }
+    .message.error {
+      background: #fef2f2;
+      border: 1px solid #f5c6c6;
+      color: var(--error-text);
+    }
+    .message.success {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: var(--success-text);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--deep);
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      background: #fefaf5;
+      border: 1.5px solid #e2cfbb;
+      border-radius: 24px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      transition: 0.2s;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(184,154,106,0.2);
+      background: white;
+    }
+    .form-group input.error {
+      border-color: var(--error-text);
+      background: #fef2f2;
+    }
+    .form-group input::placeholder {
+      color: #cbbca8;
+    }
+
+    .password-strength {
+      font-size: 12px;
+      margin-top: 6px;
+      display: flex;
+      gap: 4px;
+    }
+    .strength-bar {
+      flex: 1;
+      height: 3px;
+      background: #e2cfbb;
+      border-radius: 2px;
+      transition: background 0.3s;
+    }
+    .strength-bar.weak { background: #c95a5a; }
+    .strength-bar.medium { background: #f59e0b; }
+    .strength-bar.strong { background: #15803d; }
+
+    .terms {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .terms a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+    .terms a:hover {
+      text-decoration: underline;
+    }
+
+    .register-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--blue), var(--sky));
+      border: none;
+      border-radius: 40px;
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 8px 18px rgba(150,110,70,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .register-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(150,110,70,0.35);
+    }
+    .register-btn:disabled {
+      opacity: 0.7;
+      cursor: default;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .login-link a {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 24px 20px;
+      }
+      .card h1 {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <button class="back-link" id="backBtn">← Kembali ke Login</button>
+
+  <div class="card">
+    <h1>Daftar Akun</h1>
+    <div class="card-sub">Buat akun Creatify untuk memulai</div>
+
+    <div id="messageBox" class="message"></div>
+
+    <form id="registerForm">
+      <div class="form-group">
+        <label>Nama Lengkap</label>
+        <input type="text" id="fullName" placeholder="Masukkan nama Anda" autocomplete="name">
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="contoh@email.com" autocomplete="email" inputmode="email">
+      </div>
+
+      <div class="form-group">
+        <label>Kata Sandi</label>
+        <input type="password" id="password" placeholder="Minimal 6 karakter" autocomplete="new-password" id="pwdInput">
+        <div class="password-strength">
+          <div class="strength-bar" id="bar1"></div>
+          <div class="strength-bar" id="bar2"></div>
+          <div class="strength-bar" id="bar3"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Konfirmasi Kata Sandi</label>
+        <input type="password" id="passwordConfirm" placeholder="Ulangi kata sandi" autocomplete="new-password">
+      </div>
+
+      <div class="terms">
+        Dengan mendaftar, Anda setuju dengan <a href="javascript:void(0)" onclick="alert('Kebijakan Privasi Creatify akan ditampilkan di sini')">Kebijakan Privasi</a> dan <a href="javascript:void(0)" onclick="alert('Syarat & Ketentuan Creatify akan ditampilkan di sini')">Syarat & Ketentuan</a> kami.
+      </div>
+
+      <button type="submit" class="register-btn" id="registerBtn">
+        Buat Akun
+      </button>
+    </form>
+
+    <div class="login-link">
+      Sudah punya akun? <a href="./index.html">Masuk di sini</a>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { 
+    getAuth, 
+    createUserWithEmailAndPassword,
+    updateProfile,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDSiWxxT-qgM_tStgaw7D8AuNaDgI3mkcY",
+    authDomain:        "creatify.my.id",
+    projectId:         "landing-page-creatify",
+    storageBucket:     "landing-page-creatify.firebasestorage.app",
+    messagingSenderId: "142614580975",
+    appId:             "1:142614580975:web:368ba820dbfc5f69ca151a"
+  };
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // ======================= UI ELEMENTS =======================
+    const form = document.getElementById('registerForm');
+    const fullNameInput = document.getElementById('fullName');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const passwordConfirmInput = document.getElementById('passwordConfirm');
+    const registerBtn = document.getElementById('registerBtn');
+    const messageBox = document.getElementById('messageBox');
+    const backBtn = document.getElementById('backBtn');
+    const passwordStrengthBars = [
+      document.getElementById('bar1'),
+      document.getElementById('bar2'),
+      document.getElementById('bar3')
+    ];
+
+    // ======================= HELPERS =======================
+    function showMessage(message, type = 'error') {
+      messageBox.textContent = message;
+      messageBox.className = `message show ${type}`;
+      
+      if (type === 'error') {
+        setTimeout(() => {
+          messageBox.classList.remove('show');
+        }, 4000);
+      }
+    }
+
+    function clearMessage() {
+      messageBox.classList.remove('show');
+    }
+
+    function clearInputErrors() {
+      fullNameInput.classList.remove('error');
+      emailInput.classList.remove('error');
+      passwordInput.classList.remove('error');
+      passwordConfirmInput.classList.remove('error');
+    }
+
+    function validateEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    function calculatePasswordStrength(password) {
+      let strength = 0;
+      if (password.length >= 8) strength++;
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password) || /[!@#$%^&*]/.test(password)) strength++;
+      return strength;
+    }
+
+    function updatePasswordStrength() {
+      const password = passwordInput.value;
+      const strength = calculatePasswordStrength(password);
+      const strengths = ['', 'weak', 'medium', 'strong'];
+      
+      passwordStrengthBars.forEach((bar, index) => {
+        bar.classList.remove('weak', 'medium', 'strong');
+        if (index < strength) {
+          bar.classList.add(strengths[strength]);
+        }
+      });
+    }
+
+    function validateForm() {
+      clearInputErrors();
+      const fullName = fullNameInput.value.trim();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const passwordConfirm = passwordConfirmInput.value;
+      let isValid = true;
+
+      if (!fullName) {
+        fullNameInput.classList.add('error');
+        showMessage('Nama harus diisi.');
+        isValid = false;
+      } else if (fullName.length < 3) {
+        fullNameInput.classList.add('error');
+        showMessage('Nama minimal 3 karakter.');
+        isValid = false;
+      }
+
+      if (!email) {
+        emailInput.classList.add('error');
+        showMessage('Email harus diisi.');
+        isValid = false;
+      } else if (!validateEmail(email)) {
+        emailInput.classList.add('error');
+        showMessage('Format email tidak valid. Contoh: nama@email.com');
+        isValid = false;
+      }
+
+      if (!password) {
+        passwordInput.classList.add('error');
+        showMessage('Kata sandi harus diisi.');
+        isValid = false;
+      } else if (password.length < 6) {
+        passwordInput.classList.add('error');
+        showMessage('Kata sandi minimal 6 karakter.');
+        isValid = false;
+      }
+
+      if (!passwordConfirm) {
+        passwordConfirmInput.classList.add('error');
+        showMessage('Konfirmasi kata sandi harus diisi.');
+        isValid = false;
+      } else if (password !== passwordConfirm) {
+        passwordConfirmInput.classList.add('error');
+        showMessage('Kata sandi tidak cocok.');
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
+    function getFirebaseErrorMessage(code) {
+      const errorMap = {
+        'auth/email-already-in-use':    'Email ini sudah terdaftar.',
+        'auth/invalid-email':           'Format email tidak valid.',
+        'auth/weak-password':           'Kata sandi terlalu lemah. Gunakan kombinasi huruf, angka, dan simbol.',
+        'auth/operation-not-allowed':   'Pendaftaran tidak diaktifkan.',
+        'auth/network-request-failed':  'Gagal terhubung ke server. Periksa koneksi internet.',
+      };
+      return errorMap[code] || 'Pendaftaran gagal. Silakan coba lagi.';
+    }
+
+    // ======================= REGISTER HANDLER =======================
+    async function handleRegister(e) {
+      e.preventDefault();
+
+      if (!validateForm()) return;
+
+      clearMessage();
+      registerBtn.disabled = true;
+      const originalBtnText = registerBtn.innerHTML;
+      registerBtn.innerHTML = '<div class="spinner"></div> Mendaftar...';
+
+      try {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        const fullName = fullNameInput.value.trim();
+
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Update profile dengan nama
+        await updateProfile(userCredential.user, {
+          displayName: fullName
+        });
+
+        showMessage('✓ Akun berhasil dibuat! Mengalihkan ke login...', 'success');
+        
+        // Sign out dan arahkan ke login
+        await signOut(auth);
+        
+        setTimeout(() => {
+          window.location.href = './index.html';
+        }, 2000);
+      } catch (error) {
+        registerBtn.disabled = false;
+        registerBtn.innerHTML = originalBtnText;
+        const friendlyMsg = getFirebaseErrorMessage(error.code);
+        showMessage(friendlyMsg, 'error');
+        console.warn('[Register Error]', error.code, error.message);
+      }
+    }
+
+    // ======================= EVENT LISTENERS =======================
+    form.addEventListener('submit', handleRegister);
+    
+    passwordInput.addEventListener('input', updatePasswordStrength);
+    
+    fullNameInput.addEventListener('input', () => {
+      fullNameInput.classList.remove('error');
+    });
+    emailInput.addEventListener('input', () => {
+      emailInput.classList.remove('error');
+    });
+    passwordInput.addEventListener('input', () => {
+      passwordInput.classList.remove('error');
+    });
+    passwordConfirmInput.addEventListener('input', () => {
+      passwordConfirmInput.classList.remove('error');
+    });
+
+    backBtn.addEventListener('click', () => {
+      window.location.href = './index.html';
+    });
+
+    console.log('✨ Creatify — Register Page ready');
+
+  } catch (error) {
+    console.error('Firebase initialization error:', error);
+    const messageBox = document.getElementById('messageBox');
+    messageBox.className = 'message show error';
+    messageBox.textContent = 'Gagal menginisialisasi aplikasi.';
+  }
+</script>
+
+</body>
+</html>

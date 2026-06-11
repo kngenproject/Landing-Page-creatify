@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dashboard Creatify - Kelola acara dan undangan Anda">
+  <meta name="theme-color" content="#b89a6a">
+  <title>Creatify • Dashboard</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f5f0e8;
+      --blue: #b89a6a;
+      --sky: #d4b896;
+      --deep: #6b4f2e;
+      --text: #2c2118;
+      --muted: #9a8570;
+      --white: #fdfaf5;
+      --success: #15803d;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: var(--white);
+      border-bottom: 1px solid #e4d5c2;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .logout-btn {
+      padding: 8px 16px;
+      background: none;
+      border: 1px solid #e2cfbb;
+      border-radius: 20px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #f3ecdf;
+      border-color: var(--blue);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .welcome-section {
+      margin-bottom: 40px;
+      animation: fadeUp 0.5s ease;
+    }
+
+    .welcome-section h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 8vw, 56px);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .welcome-section p {
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--blue), var(--sky));
+      color: white;
+      border: none;
+      border-radius: 24px;
+      font-weight: 700;
+      font-size: 14px;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 8px 18px rgba(150,110,70,0.25);
+      margin-top: 16px;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(150,110,70,0.35);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 28px;
+      padding: 24px;
+      border: 1px solid #e4d5c2;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      transition: all 0.3s ease;
+      animation: fadeUp 0.5s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+      border-color: var(--blue);
+    }
+
+    .card-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .card-meta {
+      font-size: 12px;
+      color: #baa080;
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      background: #f8f5f0;
+      border-radius: 12px;
+      display: inline-block;
+    }
+
+    .card-action {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-small {
+      flex: 1;
+      padding: 10px 14px;
+      background: #f3ecdf;
+      border: none;
+      border-radius: 16px;
+      color: #8e6a48;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: 0.2s;
+    }
+
+    .btn-small:hover {
+      background: var(--blue);
+      color: white;
+    }
+
+    .btn-small.delete {
+      background: #fef2f2;
+      color: #c95a5a;
+    }
+
+    .btn-small.delete:hover {
+      background: #c95a5a;
+      color: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state h2 {
+      font-size: 20px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(184,154,106,0.2);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 16px;
+      }
+
+      .navbar {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+
+      .navbar-left,
+      .navbar-right {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <a href="./index.html" class="logo">✨ Creatify</a>
+  </div>
+  <div class="navbar-right">
+    <span class="user-name" id="userDisplayName">Loading...</span>
+    <button class="logout-btn" id="logoutBtn">Keluar</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="welcome-section">
+    <h1>Halo, <span id="userName">Pengguna</span>! 👋</h1>
+    <p>Selamat datang di dashboard Creatify. Kelola acara dan undangan digital Anda di sini.</p>
+    <button class="cta-button" id="createNewBtn">
+      ✨ Buat Undangan Baru
+    </button>
+  </div>
+
+  <div id="loadingState" class="loading" style="display: none;">
+    <div class="spinner"></div>
+    <span>Memuat data Anda...</span>
+  </div>
+
+  <div id="invitationsContainer"></div>
+
+  <div id="emptyState" class="empty-state" style="display: none;">
+    <div class="empty-state-icon">📭</div>
+    <h2>Belum ada undangan</h2>
+    <p>Mulai buat undangan digital pertama Anda untuk acara spesial Anda</p>
+    <button class="cta-button" id="createNewEmptyBtn">
+      ✨ Buat Undangan Sekarang
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDSiWxxT-qgM_tStgaw7D8AuNaDgI3mkcY",
+    authDomain:        "creatify.my.id",
+    projectId:         "landing-page-creatify",
+    storageBucket:     "landing-page-creatify.firebasestorage.app",
+    messagingSenderId: "142614580975",
+    appId:             "1:142614580975:web:368ba820dbfc5f69ca151a"
+  };
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // ======================= UI ELEMENTS =======================
+    const userDisplayName = document.getElementById('userDisplayName');
+    const userName = document.getElementById('userName');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const createNewBtn = document.getElementById('createNewBtn');
+    const createNewEmptyBtn = document.getElementById('createNewEmptyBtn');
+    const invitationsContainer = document.getElementById('invitationsContainer');
+    const emptyState = document.getElementById('emptyState');
+    const loadingState = document.getElementById('loadingState');
+
+    // ======================= AUTH CHECK =======================
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Redirect ke login jika tidak ada user
+        window.location.href = './index.html';
+        return;
+      }
+
+      // Set user info
+      const displayName = user.displayName || user.email || 'Pengguna';
+      userDisplayName.textContent = displayName.split(' ')[0]; // Nama pertama saja
+      userName.textContent = displayName.split(' ')[0];
+
+      // Load invitations
+      loadInvitations(user);
+    });
+
+    // ======================= LOAD INVITATIONS =======================
+    function loadInvitations(user) {
+      loadingState.style.display = 'flex';
+      
+      // Simulasi loading delay
+      setTimeout(() => {
+        const savedInvitations = localStorage.getItem('creatifyInvitations');
+        const invitations = savedInvitations ? JSON.parse(savedInvitations) : [];
+
+        loadingState.style.display = 'none';
+
+        if (invitations.length === 0) {
+          emptyState.style.display = 'block';
+          invitationsContainer.innerHTML = '';
+        } else {
+          emptyState.style.display = 'none';
+          renderInvitations(invitations);
+        }
+      }, 500);
+    }
+
+    function renderInvitations(invitations) {
+      invitationsContainer.innerHTML = `
+        <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 20px; color: var(--text);">
+          Undangan Anda (${invitations.length})
+        </h2>
+        <div class="grid">
+          ${invitations.map((inv, idx) => `
+            <div class="card">
+              <div class="card-icon">💌</div>
+              <h3>${inv.eventName}</h3>
+              <div class="card-desc">${inv.eventLocation}</div>
+              <div class="card-meta">
+                📅 ${formatDate(inv.eventDate)}
+              </div>
+              <div class="card-action">
+                <button class="btn-small" onclick="editInvitation(${idx})">✏️ Edit</button>
+                <button class="btn-small" onclick="shareInvitation(${idx})">🔗 Bagikan</button>
+                <button class="btn-small delete" onclick="deleteInvitation(${idx})">🗑️ Hapus</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('id-ID', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    }
+
+    // Global functions
+    window.editInvitation = function(idx) {
+      alert(`Edit undangan #${idx + 1} - Fitur ini akan segera tersedia`);
+    };
+
+    window.shareInvitation = function(idx) {
+      alert(`Share undangan #${idx + 1} - Link akan disalin ke clipboard`);
+    };
+
+    window.deleteInvitation = function(idx) {
+      if (confirm('Apakah Anda yakin ingin menghapus undangan ini?')) {
+        const savedInvitations = localStorage.getItem('creatifyInvitations');
+        const invitations = savedInvitations ? JSON.parse(savedInvitations) : [];
+        invitations.splice(idx, 1);
+        localStorage.setItem('creatifyInvitations', JSON.stringify(invitations));
+        location.reload();
+      }
+    };
+
+    // ======================= EVENT LISTENERS =======================
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        window.location.href = './index.html';
+      } catch (error) {
+        console.error('Logout error:', error);
+        alert('Gagal logout. Silakan coba lagi.');
+      }
+    });
+
+    createNewBtn.addEventListener('click', () => {
+      window.location.href = './generator.html';
+    });
+
+    createNewEmptyBtn.addEventListener('click', () => {
+      window.location.href = './generator.html';
+    });
+
+    console.log('✨ Creatify — Dashboard ready');
+
+  } catch (error) {
+    console.error('Firebase initialization error:', error);
+    alert('Gagal menginisialisasi aplikasi. Silakan refresh halaman.');
+  }
+</script>
+
+</body>
+</html>
